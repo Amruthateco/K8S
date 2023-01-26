@@ -1,0 +1,166 @@
+firstpod.yml 
+apiVersion: v1
+kind: Pod
+metadata:
+    name: tomcat-nginx
+    labels:
+      app: tomcat
+spec:
+  containers:
+  - name: mytomcat
+    image: rangalakshmi123/lakshmi:1.0.0
+
+  - name: nginx
+    image: nginx:1.14.2
+    
+    ----
+    ervice.yml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat-nginx1
+spec:
+  selector:
+    app: tomcat
+  type: ClusterIP
+  ports: 
+    - name: tomcat
+      protocol: TCP
+      targetPort: 8080
+      port: 8080
+    - name: nginx
+      protocol: TCP
+      targetPort: 80
+      port: 80
+      ----
+      nodeport.yml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat-nodeport
+spec:
+  selector:
+    app: tomcat
+  type: NodePort
+  ports: 
+    - name: tomcat
+      protocol: TCP
+      targetPort: 8080
+      port: 8080
+    - name: nginx
+      protocol: TCP
+      targetPort: 80
+      port: 80
+      nodePort: 30009  
+      ----
+       loadbalancer.yml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat-loadbalancer
+spec:
+  selector:
+    app: tomcat
+  type: LoadBalancer
+  ports: 
+    - name: tomcat
+      protocol: TCP
+      targetPort: 8080
+      port: 8080
+    - name: nginx
+      protocol: TCP
+      targetPort: 80
+      port: 80
+      
+      ---
+      replicaset.yml 
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: tomcat
+spec:
+  replicas: 2
+  selector:
+   matchLabels:
+     app: tomcat
+  template:
+    metadata:
+      name: tomcat-nginx
+      labels:
+        app: tomcat
+    spec:
+      containers:
+        - name: tomcat
+          image: rangalakshmi123/lakshmi:1.0.0
+          
+          ---
+          eployment.yml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+spec:
+  replicas: 5
+  selector:
+   matchLabels:
+     app: tomcat
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 2
+  template:
+    metadata:
+      name: tomcat-nginx
+      labels:
+        app: tomcat
+    spec:
+      containers:
+        - name: tomcat
+          image: rangalakshmi123/lakshmi:14.3
+          ----
+          devnamespace.yml 
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: dev-envi-namespace
+  ----
+  podlimit.yml 
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: podquota
+  namespace: dev-envi-namespace
+spec:
+  hard:
+    pods: "2"
+    ---
+resourcequota.yml
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: memory-cpu-quota
+  namespace: dev-envi-namespace
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    ----
+limitrange.yml 
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: memory-limit-range
+  namespace: dev-envi-namespace
+spec:
+  limits:
+  - default:
+      memory: 500Mi
+      cpu: 1
+    defaultRequest:
+      memory: 250Mi
+      cpu: 0.4
+    type: Container
