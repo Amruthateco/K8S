@@ -14,7 +14,7 @@ spec:
     image: nginx:1.14.2
     
     ----
-    ervice.yml 
+    Service.yml 
 apiVersion: v1
 kind: Service
 metadata:
@@ -73,7 +73,8 @@ spec:
       port: 80
       
       ---
-      replicaset.yml 
+      replicaset.yml
+      
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
@@ -94,7 +95,7 @@ spec:
           image: rangalakshmi123/lakshmi:1.0.0
           
           ---
-          eployment.yml 
+          DEPLOYMENT.yml 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
